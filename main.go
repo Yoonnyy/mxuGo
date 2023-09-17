@@ -1,25 +1,49 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"io"
 	"math/rand"
 	"net/http"
+	"os"
 	"regexp"
 
+	"github.com/Yoonnyy/GoMxu/models"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	_ "github.com/lib/pq"
 )
 
 type application struct {
+	SlugStore models.SlugStore
+}
+
+var App = application{}
+
+func (app *application) connectDb(dataSource string) error {
+	db, err := sql.Open("postgres", dataSource)
+	if err != nil {
+		return err
+	}
+	app.SlugStore = models.SlugStore{
+		DB: db,
+	}
+
+	return db.Ping()
 }
 
 func main() {
-	app := application{}
+
+	// database connection
+	err := App.connectDb(os.Getenv("DATABASE_URL"))
+	if err != nil {
+		panic(err)
+	}
 
 	server := &http.Server{
 		Addr:    ":1315",
-		Handler: app.routes(),
+		Handler: App.routes(),
 	}
 
 	server.ListenAndServe()
@@ -45,7 +69,7 @@ func searchSlug(w http.ResponseWriter, r *http.Request) {
 
 // POST /
 func createShortened(w http.ResponseWriter, r *http.Request) {
-	// TODO: limit file size
+	// TODO: [Setting] limit file size
 	r.ParseMultipartForm(100 * 1024 * 1024)
 
 	if r.Form.Has("url") && r.MultipartForm.File["file"] != nil {
@@ -65,22 +89,68 @@ func createShortened(w http.ResponseWriter, r *http.Request) {
 		// get the url
 		url := r.FormValue("url")
 
-		if matched, _ := regexp.MatchString(url, "^https?://"); !matched {
+		// check if url starts with https:// or http://
+		if matched, _ := regexp.MatchString("^https?://", url); !matched {
 			w.WriteHeader(http.StatusBadRequest)
 			io.WriteString(w, "urls must start with http:// or https:// \n")
 			return
 		}
 
+		// check blacklisted urls
+
+		// ping url to check if exists
+
 		// generate slug
+		// TODO: [Setting] length
+		slug := randomSlug(6)
+		// check if slug already exists
+
+		// save slug to database
+
+		// respond with slug
+		io.WriteString(w, fmt.Sprintf("https://localhost:1315/%v\n", slug))
+		return
 	}
-	// file := r.FormValue("file")
 
-	// file, header, err := r.FormFile("file")
+	// shortening url
+	if r.MultipartForm.File["file"] != nil {
+		file, handler, err := r.FormFile("file")
+		if err != nil {
+			fmt.Println("Error Retrieving the File")
+			fmt.Println(err)
+			return
+		}
+		defer file.Close()
 
-	// if err != nil {
+		fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+		fmt.Printf("File Size: %+v\n", handler.Size)
+		fmt.Printf("MIME Header: %+v\n", handler.Header)
 
-	// }
-	// respond with slug
+		tempFile, err := os.CreateTemp("/tmp", "upload-*.png")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		defer tempFile.Close()
+
+		fileBytes, err := io.ReadAll(file)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		tempFile.Write(fileBytes)
+
+		// generate slug
+		// TODO: [Setting] length
+		slug := randomSlug(6)
+		// check if slug already exists
+
+		// save slug to database
+
+		// respond with slug
+		io.WriteString(w, fmt.Sprintf("https://localhost:1315/%v\n", slug))
+		return
+	}
 }
 
 func randomSlug(n int) string {

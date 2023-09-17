@@ -19,7 +19,7 @@ SET default_table_access_method = heap;
 
 CREATE TABLE public.files (
     id integer NOT NULL,
-    "originalFilename" character varying(255) NOT NULL,
+    original_filename character varying(255) NOT NULL,
     slug character varying(255) NOT NULL,
     size integer NOT NULL,
     expires bigint NOT NULL
@@ -36,12 +36,12 @@ CREATE TABLE public.schema_migrations (
 
 
 --
--- Name: shortened; Type: TABLE; Schema: public; Owner: -
+-- Name: slugs; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.shortened (
+CREATE TABLE public.slugs (
     id integer NOT NULL,
-    "isFile" boolean NOT NULL,
+    is_file boolean NOT NULL,
     slug character varying(255) NOT NULL
 );
 
@@ -83,19 +83,19 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
--- Name: shortened shortened_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: slugs slugs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.shortened
-    ADD CONSTRAINT shortened_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.slugs
+    ADD CONSTRAINT slugs_pkey PRIMARY KEY (id);
 
 
 --
--- Name: shortened shortened_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: slugs slugs_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.shortened
-    ADD CONSTRAINT shortened_slug_key UNIQUE (slug);
+ALTER TABLE ONLY public.slugs
+    ADD CONSTRAINT slugs_slug_key UNIQUE (slug);
 
 
 --
@@ -122,10 +122,10 @@ CREATE INDEX files_slug_idx ON public.files USING btree (slug);
 
 
 --
--- Name: shortened_slug_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: slugs_slug_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX shortened_slug_idx ON public.shortened USING btree (slug);
+CREATE INDEX slugs_slug_idx ON public.slugs USING btree (slug);
 
 
 --
@@ -133,6 +133,22 @@ CREATE INDEX shortened_slug_idx ON public.shortened USING btree (slug);
 --
 
 CREATE INDEX urls_slug_idx ON public.urls USING btree (slug);
+
+
+--
+-- Name: files fk_slug; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.files
+    ADD CONSTRAINT fk_slug FOREIGN KEY (slug) REFERENCES public.slugs(slug) ON DELETE CASCADE;
+
+
+--
+-- Name: urls fk_slug; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.urls
+    ADD CONSTRAINT fk_slug FOREIGN KEY (slug) REFERENCES public.slugs(slug) ON DELETE CASCADE;
 
 
 --
