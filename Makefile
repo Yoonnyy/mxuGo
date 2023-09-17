@@ -1,13 +1,19 @@
-createDb:
+createdb:
 	dbmate -u "postgres://chan:0000@localhost:5432/mxuGo?sslmode=disable" create
 
-dropDb:
+dropdb:
 	dbmate -u "postgres://chan:0000@localhost:5432/mxuGo?sslmode=disable" drop
 
-migrateUp:
+migrate-up:
 	dbmate -u "postgres://chan:0000@localhost:5432/mxuGo?sslmode=disable" up
 
-migrateDown:
+migrate-down:
 	dbmate -u "postgres://chan:0000@localhost:5432/mxuGo?sslmode=disable" down
 
-.PHONY: createDb dropDb migrateUp migrateDown
+run:
+	go run main.go
+
+watch:
+	gow run .
+
+.PHONY: createDb dropDb migrateUp migrateDown run watch 
