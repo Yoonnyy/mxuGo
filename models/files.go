@@ -4,7 +4,7 @@ import "database/sql"
 
 type File struct {
 	Id               int
-	OriginalFilename bool
+	OriginalFilename string
 	Slug             string
 	Size             int
 	Expires          int
@@ -60,7 +60,7 @@ func (s *FileStore) GetBySlug(slug string) (*File, error) {
 	return &q, nil
 }
 
-func (s *FileStore) Insert(id int, originalFilename bool, slug string, size, expires int) error {
+func (s *FileStore) Insert(id int, originalFilename string, slug string, size, expires int) error {
 	_, err := s.DB.Exec(`
 	insert into 
 	files(id, original_filename, slug, size, expires)

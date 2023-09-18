@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"io"
 	"math/rand"
@@ -9,44 +8,50 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/Yoonnyy/GoMxu/db"
 	"github.com/Yoonnyy/GoMxu/models"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/lib/pq"
 )
 
+// TODO: convert stores to interfaces
 type application struct {
 	SlugStore models.SlugStore
+	UrlStore  models.UrlStore
+	FileStore models.FileStore
 }
 
-var App = application{}
-
-func (app *application) connectDb(dataSource string) error {
-	db, err := sql.Open("postgres", dataSource)
-	if err != nil {
-		return err
-	}
-	app.SlugStore = models.SlugStore{
-		DB: db,
+func (app *application) Serve() error {
+	server := &http.Server{
+		Addr:    ":1315",
+		Handler: app.routes(),
 	}
 
-	return db.Ping()
+	return server.ListenAndServe()
 }
 
 func main() {
-
 	// database connection
-	err := App.connectDb(os.Getenv("DATABASE_URL"))
+	db, err := db.ConnectDB(os.Getenv("DATABASE_URL"))
 	if err != nil {
 		panic(err)
 	}
+	defer db.Close()
 
-	server := &http.Server{
-		Addr:    ":1315",
-		Handler: App.routes(),
+	var app = application{
+		SlugStore: models.SlugStore{
+			DB: db,
+		},
+		UrlStore: models.UrlStore{
+			DB: db,
+		},
+		FileStore: models.FileStore{
+			DB: db,
+		},
 	}
 
-	server.ListenAndServe()
+	app.Serve()
 }
 
 func (app *application) routes() *chi.Mux {

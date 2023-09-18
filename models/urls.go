@@ -60,7 +60,7 @@ func (s *UrlStore) GetBySlug(slug string) (*Url, error) {
 func (s *UrlStore) Insert(id int, slug, destination string, expires int) error {
 	_, err := s.DB.Exec(`
 	insert into 
-	files(id, slug, destination, expires)
+	urls(id, slug, destination, expires)
 	values ($1, $2, $3, $4);
 	`, id, slug, destination, expires)
 	if err != nil {
