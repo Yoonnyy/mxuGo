@@ -8,14 +8,46 @@ import (
 	"regexp"
 
 	"github.com/Yoonnyy/GoMxu/helpers"
+	"github.com/Yoonnyy/GoMxu/models"
 	"github.com/go-chi/chi/v5"
+)
+
+var (
+	slugs models.SlugStore
+	urls  models.UrlStore
+	files models.FileStore
 )
 
 // GET	/{slug}
 func SearchSlug(w http.ResponseWriter, r *http.Request) {
 	slug := chi.URLParam(r, "slug")
 
-	fmt.Println(slug)
+	// check if slug exists
+	s, err := slugs.GetBySlug(slug)
+
+	if err != nil {
+		w.WriteHeader(404)
+		io.WriteString(w, "not found\n")
+		return
+	}
+
+	// handle url redirect
+	if !s.IsFile {
+		// get the url
+		url, err := urls.GetBySlug(slug)
+
+		// if somehow the slug exists but the url doesn't
+		if err != nil {
+			w.WriteHeader(500)
+			io.WriteString(w, "the url doesn't exist on the server??")
+			return
+		}
+
+		w.Header().Add("Location", url.Destination)
+		return
+	}
+
+	// handle file download
 }
 
 // POST /
@@ -28,7 +60,7 @@ func CreateShortened(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		io.WriteString(w, "provide a url or a file. not both\n")
 		return
-	} else if !r.Form.Has("url") || r.MultipartForm.File["file"] != nil {
+	} else if !r.Form.Has("url") && r.MultipartForm.File["file"] == nil {
 		// reject if both url and file isn't present
 		w.WriteHeader(http.StatusBadRequest)
 		io.WriteString(w, "provide a url or a file\n")
@@ -63,7 +95,7 @@ func CreateShortened(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// shortening url
+	// file upload
 	if r.MultipartForm.File["file"] != nil {
 		file, handler, err := r.FormFile("file")
 		if err != nil {

@@ -1,7 +1,5 @@
 package models
 
-import "database/sql"
-
 type Slug struct {
 	Id     int
 	IsFile bool
@@ -9,11 +7,10 @@ type Slug struct {
 }
 
 type SlugStore struct {
-	DB *sql.DB
 }
 
 func (s *SlugStore) GetById(id int) (*Slug, error) {
-	row := s.DB.QueryRow(`
+	row := db.QueryRow(`
 	select 
 	slugs.id, 
 	slugs.is_file, 
@@ -34,7 +31,7 @@ func (s *SlugStore) GetById(id int) (*Slug, error) {
 }
 
 func (s *SlugStore) GetBySlug(slug string) (*Slug, error) {
-	row := s.DB.QueryRow(`
+	row := db.QueryRow(`
 	select 
 	slugs.id, 
 	slugs.is_file, 
@@ -55,7 +52,7 @@ func (s *SlugStore) GetBySlug(slug string) (*Slug, error) {
 }
 
 func (s *SlugStore) Insert(id int, isFile bool, slug string) error {
-	_, err := s.DB.Exec("insert into slugs(id, is_file, slug) values ($1, $2, $3);", id, isFile, slug)
+	_, err := db.Exec("insert into slugs(id, is_file, slug) values ($1, $2, $3);", id, isFile, slug)
 	if err != nil {
 		return err
 	}
@@ -63,7 +60,7 @@ func (s *SlugStore) Insert(id int, isFile bool, slug string) error {
 }
 
 func (s *SlugStore) DeleteById(id int) error {
-	_, err := s.DB.Exec("delete from slugs where id = $1", id)
+	_, err := db.Exec("delete from slugs where id = $1", id)
 	if err != nil {
 		return err
 	}
@@ -71,7 +68,7 @@ func (s *SlugStore) DeleteById(id int) error {
 }
 
 func (s *SlugStore) DeleteBySlug(slug string) error {
-	_, err := s.DB.Exec("delete from slugs where slug = $1", slug)
+	_, err := db.Exec("delete from slugs where slug = $1", slug)
 	if err != nil {
 		return err
 	}

@@ -1,7 +1,5 @@
 package models
 
-import "database/sql"
-
 type Url struct {
 	Id          int
 	Slug        string
@@ -10,11 +8,10 @@ type Url struct {
 }
 
 type UrlStore struct {
-	DB *sql.DB
 }
 
 func (s *UrlStore) GetById(id int) (*Url, error) {
-	row := s.DB.QueryRow(`
+	row := db.QueryRow(`
 	select 
 	id,
 	slug,
@@ -36,7 +33,7 @@ func (s *UrlStore) GetById(id int) (*Url, error) {
 }
 
 func (s *UrlStore) GetBySlug(slug string) (*Url, error) {
-	row := s.DB.QueryRow(`
+	row := db.QueryRow(`
 	select 
 	id,
 	slug,
@@ -58,7 +55,7 @@ func (s *UrlStore) GetBySlug(slug string) (*Url, error) {
 }
 
 func (s *UrlStore) Insert(id int, slug, destination string, expires int) error {
-	_, err := s.DB.Exec(`
+	_, err := db.Exec(`
 	insert into 
 	urls(id, slug, destination, expires)
 	values ($1, $2, $3, $4);
@@ -71,7 +68,7 @@ func (s *UrlStore) Insert(id int, slug, destination string, expires int) error {
 
 func (s *UrlStore) DeleteById(id int) error {
 	// delete from table `slugs` so it cascades
-	_, err := s.DB.Exec("delete from slugs where id = $1", id)
+	_, err := db.Exec("delete from slugs where id = $1", id)
 	if err != nil {
 		return err
 	}
@@ -80,7 +77,7 @@ func (s *UrlStore) DeleteById(id int) error {
 
 func (s *UrlStore) DeleteBySlug(slug string) error {
 	// delete from table `slugs` so it cascades
-	_, err := s.DB.Exec("delete from slugs where slug = $1", slug)
+	_, err := db.Exec("delete from slugs where slug = $1", slug)
 	if err != nil {
 		return err
 	}

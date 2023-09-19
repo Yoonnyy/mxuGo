@@ -11,9 +11,7 @@ import (
 
 // TODO: convert stores to interfaces
 type application struct {
-	SlugStore models.SlugStore
-	UrlStore  models.UrlStore
-	FileStore models.FileStore
+	Models models.Models
 }
 
 func (app *application) Serve() error {
@@ -34,15 +32,7 @@ func main() {
 	defer db.Close()
 
 	var app = application{
-		SlugStore: models.SlugStore{
-			DB: db,
-		},
-		UrlStore: models.UrlStore{
-			DB: db,
-		},
-		FileStore: models.FileStore{
-			DB: db,
-		},
+		Models: models.Init(db),
 	}
 
 	app.Serve()
