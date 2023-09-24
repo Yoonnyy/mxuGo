@@ -20,7 +20,7 @@ var (
 
 // GET	/{slug}
 func SearchSlug(w http.ResponseWriter, r *http.Request) {
-	if !config.FileDownloadActive && !config.UrlReditectActive {
+	if !config.FileDownloadActive && !config.UrlRedirectActive {
 		w.WriteHeader(418)
 		io.WriteString(w, "services are disabled\n")
 		return
@@ -40,6 +40,11 @@ func SearchSlug(w http.ResponseWriter, r *http.Request) {
 
 	// handle url redirect
 	if !s.IsFile {
+		if !config.UrlRedirectActive {
+			w.WriteHeader(418)
+			io.WriteString(w, "url redirection service is disabled\n")
+			return
+		}
 		// get the url
 		url, err := urls.GetBySlug(slug)
 
@@ -52,6 +57,11 @@ func SearchSlug(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Add("Location", url.Destination)
 		w.WriteHeader(301)
+		return
+	}
+	if !config.FileDownloadActive {
+		w.WriteHeader(418)
+		io.WriteString(w, "file download service is disabled\n")
 		return
 	}
 
@@ -85,6 +95,11 @@ func CreateShortened(w http.ResponseWriter, r *http.Request) {
 
 	// shortening url
 	if r.Form.Has("url") {
+		if !config.UrlShorteningActive {
+			w.WriteHeader(418)
+			io.WriteString(w, "url shortening service is disabled\n")
+			return
+		}
 		// get the url
 		url := r.FormValue("url")
 
@@ -124,6 +139,11 @@ func CreateShortened(w http.ResponseWriter, r *http.Request) {
 
 	// file upload
 	if r.MultipartForm.File["file"] != nil {
+		if !config.FileUploadActive {
+			w.WriteHeader(418)
+			io.WriteString(w, "file upload service is disabled\n")
+			return
+		}
 		bodyFile, handler, err := r.FormFile("file")
 		if err != nil {
 			fmt.Println("Error Retrieving the File")
