@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -46,7 +47,7 @@ func ParseConfig() *Config {
 	config.SlugLength = defaultIfNil(config.SlugLength, 6).(int)
 	config.UploadsFolder = defaultIfNil(config.UploadsFolder, "uploads").(string)
 	config.UrlShorteningActive = defaultIfNil(config.UrlShorteningActive, true).(bool)
-
+	fmt.Printf("%+v", config)
 	return &config
 }
 
@@ -54,5 +55,5 @@ func defaultIfNil(value, defaultValue interface{}) interface{} {
 	if value == nil || value == "" {
 		return defaultValue
 	}
-	return defaultValue
+	return value
 }

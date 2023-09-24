@@ -20,6 +20,11 @@ var (
 
 // GET	/{slug}
 func SearchSlug(w http.ResponseWriter, r *http.Request) {
+	if !config.FileDownloadActive && !config.UrlReditectActive {
+		w.WriteHeader(418)
+		io.WriteString(w, "services are disabled\n")
+		return
+	}
 	fmt.Println(config.DatabaseUrl)
 	// TODO: [Setting] Check if file upload or url shortening is active else reject with message
 	slug := chi.URLParam(r, "slug")
@@ -57,6 +62,11 @@ func SearchSlug(w http.ResponseWriter, r *http.Request) {
 
 // POST /
 func CreateShortened(w http.ResponseWriter, r *http.Request) {
+	if !config.FileUploadActive && !config.UrlShorteningActive {
+		w.WriteHeader(418)
+		io.WriteString(w, "services are disabled\n")
+		return
+	}
 	// TODO: [Setting] Check if file upload or url shortening is active else reject with message
 	// TODO: [Setting] limit file size
 	r.ParseMultipartForm(100 * 1024 * 1024)
