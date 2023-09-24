@@ -2,8 +2,8 @@ package main
 
 import (
 	"net/http"
-	"os"
 
+	"github.com/Yoonnyy/GoMxu/configuration"
 	"github.com/Yoonnyy/GoMxu/db"
 	"github.com/Yoonnyy/GoMxu/models"
 	_ "github.com/lib/pq"
@@ -12,6 +12,7 @@ import (
 // TODO: convert stores to interfaces
 type application struct {
 	Models models.Models
+	Config configuration.Config
 }
 
 func (app *application) Serve() error {
@@ -24,15 +25,16 @@ func (app *application) Serve() error {
 }
 
 func main() {
+	var app = application{
+		Config: *configuration.ParseConfig(),
+	}
 	// database connection
-	db, err := db.ConnectDB(os.Getenv("DATABASE_URL"))
+	db, err := db.ConnectDB(app.Config.DatabaseUrl)
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-
-	_ = models.Init(db)
-	var app = application{}
+	app.Models = models.Init(db)
 
 	app.Serve()
 }

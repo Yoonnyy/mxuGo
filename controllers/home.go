@@ -20,6 +20,7 @@ var (
 
 // GET	/{slug}
 func SearchSlug(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(config.DatabaseUrl)
 	// TODO: [Setting] Check if file upload or url shortening is active else reject with message
 	slug := chi.URLParam(r, "slug")
 
@@ -127,6 +128,7 @@ func CreateShortened(w http.ResponseWriter, r *http.Request) {
 		io.ReadFull(bodyFile, first512Byte)
 		fileType := http.DetectContentType(first512Byte)
 		_ = fileType
+		bodyFile.Seek(0, io.SeekStart)
 		// TODO: check forbidden mime types type
 
 		// generate slug

@@ -1,0 +1,51 @@
+# is url shortening active
+# defaults to true
+#
+# url_shortening_active: true
+
+# is file upload active
+# defaults to false
+#
+file_upload_active: true
+
+# database url
+# example:
+# database_url: "postgres://user_name:password@host:port/database_name?sslmode=disable..."
+
+# slug length
+# defaults to 6
+# example:
+# 127.0.0.1:1315/jO27hL
+# 
+# slug_length: 6
+
+# addres to serve on
+# defaults to 127.0.0.1
+#
+# address: 127.0.0.1
+
+# port to serve on
+# defaults to 1315
+#
+# port: 1315
+
+# folder to put the uploaded files
+# defaults to 'uploads'
+#
+# uploads_folder: uploads
+
+# max file size in bytes
+# defaults to 100 mb
+#
+# max_file_size: 104857600 
+
+# forbidden mime types for uploaded files
+forbidden_file_mimes:
+  - "application/x-dosexec"
+  - "application/x-executable"
+  - "application/x-sharedlib"
+  - "application/x-hdf5"
+  - "application/java-archive"
+  - "application/vnd.android.package-archive"
+  - "application/x-rar"
+  - "application/vnd.microsoft.portable-executable"

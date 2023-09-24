@@ -12,14 +12,14 @@ func (app *application) routes() *chi.Mux {
 
 	router.Use(middleware.Recoverer)
 	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"https://*", "http://*"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
-		// TODO: Allowed headers
+		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
 		MaxAge:           60,
 	}))
 
+	controllers.Init(app.Config)
 	router.Get("/{slug}", controllers.SearchSlug)
 	router.
 		With(middleware.AllowContentType("multipart/form-data")).
