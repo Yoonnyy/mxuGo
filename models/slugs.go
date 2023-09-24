@@ -51,8 +51,8 @@ func (s *SlugStore) GetBySlug(slug string) (*Slug, error) {
 	return &q, nil
 }
 
-func (s *SlugStore) Insert(id int, isFile bool, slug string) error {
-	_, err := db.Exec("insert into slugs(id, is_file, slug) values ($1, $2, $3);", id, isFile, slug)
+func (s *SlugStore) Insert(isFile bool, slug string) error {
+	_, err := db.Exec("insert into slugs(is_file, slug) values ($1, $2);", isFile, slug)
 	if err != nil {
 		return err
 	}

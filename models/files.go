@@ -57,12 +57,12 @@ func (s *FileStore) GetBySlug(slug string) (*File, error) {
 	return &q, nil
 }
 
-func (s *FileStore) Insert(id int, originalFilename string, slug string, size, expires int) error {
+func (s *FileStore) Insert(originalFilename string, slug string, size, expires int) error {
 	_, err := db.Exec(`
 	insert into 
 	files(id, original_filename, slug, size, expires)
-	values ($1, $2, $3, $4, $5);
-	`, id, originalFilename, slug, size, expires)
+	values ($1, $2, $3, $4);
+	`, originalFilename, slug, size, expires)
 	if err != nil {
 		return err
 	}

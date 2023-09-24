@@ -31,9 +31,8 @@ func main() {
 	}
 	defer db.Close()
 
-	var app = application{
-		Models: models.Init(db),
-	}
+	_ = models.Init(db)
+	var app = application{}
 
 	app.Serve()
 }

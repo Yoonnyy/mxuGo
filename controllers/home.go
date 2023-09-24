@@ -20,6 +20,7 @@ var (
 
 // GET	/{slug}
 func SearchSlug(w http.ResponseWriter, r *http.Request) {
+	// TODO: [Setting] Check if file upload or url shortening is active else reject with message
 	slug := chi.URLParam(r, "slug")
 
 	// check if slug exists
@@ -44,14 +45,18 @@ func SearchSlug(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Add("Location", url.Destination)
+		w.WriteHeader(301)
 		return
 	}
 
 	// handle file download
+	// TODO: [Setting uploads folder]
+	http.ServeFile(w, r, fmt.Sprintf("uploads/%s", s.Slug))
 }
 
 // POST /
 func CreateShortened(w http.ResponseWriter, r *http.Request) {
+	// TODO: [Setting] Check if file upload or url shortening is active else reject with message
 	// TODO: [Setting] limit file size
 	r.ParseMultipartForm(100 * 1024 * 1024)
 
@@ -85,10 +90,21 @@ func CreateShortened(w http.ResponseWriter, r *http.Request) {
 
 		// generate slug
 		// TODO: [Setting] length
+		// TODO: check if slug already exists
 		slug := helpers.RandomSlug(6)
-		// check if slug already exists
 
-		// save slug to database
+		// save slug and the url to database
+		err := slugs.Insert(false, slug)
+		if err != nil {
+			io.WriteString(w, "server error. retry again")
+			return
+		}
+
+		err = urls.Insert(slug, url, 0)
+		if err != nil {
+			io.WriteString(w, "server error. retry again")
+			return
+		}
 
 		// respond with slug
 		io.WriteString(w, fmt.Sprintf("https://localhost:1315/%v\n", slug))
@@ -97,38 +113,53 @@ func CreateShortened(w http.ResponseWriter, r *http.Request) {
 
 	// file upload
 	if r.MultipartForm.File["file"] != nil {
-		file, handler, err := r.FormFile("file")
+		bodyFile, handler, err := r.FormFile("file")
 		if err != nil {
 			fmt.Println("Error Retrieving the File")
 			fmt.Println(err)
 			return
 		}
-		defer file.Close()
+		defer bodyFile.Close()
 
-		fmt.Printf("Uploaded File: %+v\n", handler.Filename)
-		fmt.Printf("File Size: %+v\n", handler.Size)
-		fmt.Printf("MIME Header: %+v\n", handler.Header)
-
-		tempFile, err := os.CreateTemp("/tmp", "upload-*.png")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		defer tempFile.Close()
-
-		fileBytes, err := io.ReadAll(file)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		tempFile.Write(fileBytes)
+		// read first 512 bytes of the uploaded file
+		// to detect ContentType
+		first512Byte := make([]byte, 512)
+		io.ReadFull(bodyFile, first512Byte)
+		fileType := http.DetectContentType(first512Byte)
+		_ = fileType
+		// TODO: check forbidden mime types type
 
 		// generate slug
 		// TODO: [Setting] length
 		slug := helpers.RandomSlug(6)
 		// check if slug already exists
 
-		// save slug to database
+		// TODO: [Setting uploads folder]
+		// create file
+		file, err := os.Create("uploads/" + slug)
+		if err != nil {
+			io.WriteString(w, "error while uploading file.")
+			return
+		}
+		defer file.Close()
+
+		// read from uploaded file
+		fileBytes, err := io.ReadAll(bodyFile)
+		if err != nil {
+			io.WriteString(w, "error while uploading file.")
+			return
+		}
+
+		// write bytes to file
+		_, err = file.Write(fileBytes)
+		if err != nil {
+			io.WriteString(w, "error while uploading file.")
+			return
+		}
+
+		// save slug and the file to database
+		slugs.Insert(true, slug)
+		files.Insert(handler.Filename, slug, int(handler.Size), 0)
 
 		// respond with slug
 		io.WriteString(w, fmt.Sprintf("https://localhost:1315/%v\n", slug))

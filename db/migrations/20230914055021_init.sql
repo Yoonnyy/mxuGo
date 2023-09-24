@@ -1,12 +1,12 @@
 -- migrate:up
 CREATE TABLE "slugs" (
-	"id" int PRIMARY KEY,
+	"id" SERIAL  PRIMARY KEY,
 	"is_file" bool NOT NULL,
 	"slug" varchar(255) UNIQUE NOT NULL
 );
 
 CREATE TABLE "files" (
-	"id" int PRIMARY KEY,
+	"id" SERIAL PRIMARY KEY,
 	"original_filename" varchar(255) NOT NULL,
 	"slug" varchar(255) UNIQUE NOT NULL,
 	"size" int NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE "files" (
 );
 
 CREATE TABLE "urls" (
-	"id" int PRIMARY KEY,
+	"id" SERIAL PRIMARY KEY,
 	"slug" varchar(255) UNIQUE NOT NULL,
 	"destination" varchar(1024) NOT NULL,
 	"expires" bigint NOT NULL,
@@ -35,8 +35,8 @@ CREATE INDEX ON "files" ("slug");
 CREATE INDEX ON "urls" ("slug");
 
 -- migrate:down
-DROP TABLE "slugs";
-
 DROP TABLE "files";
 
 DROP TABLE "urls";
+
+DROP TABLE "slugs";

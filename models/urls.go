@@ -54,12 +54,12 @@ func (s *UrlStore) GetBySlug(slug string) (*Url, error) {
 	return &q, nil
 }
 
-func (s *UrlStore) Insert(id int, slug, destination string, expires int) error {
+func (s *UrlStore) Insert(slug, destination string, expires int) error {
 	_, err := db.Exec(`
 	insert into 
-	urls(id, slug, destination, expires)
-	values ($1, $2, $3, $4);
-	`, id, slug, destination, expires)
+	urls(slug, destination, expires)
+	values ($1, $2, $3);
+	`, slug, destination, expires)
 	if err != nil {
 		return err
 	}
