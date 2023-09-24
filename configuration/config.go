@@ -9,6 +9,8 @@ import (
 type Config struct {
 	FileUploadActive    bool     `yaml:"file_upload_active"`
 	UrlShorteningActive bool     `yaml:"url_shortening_active"`
+	UrlReditectActive   bool     `yaml:"url_redirect_active"`
+	FileDownloadActive  bool     `yaml:"file_download_active"`
 	DatabaseUrl         string   `yaml:"database_url"`
 	SlugLength          int      `yaml:"slug_length"`
 	Address             string   `taml:"address"`
@@ -36,6 +38,8 @@ func ParseConfig() *Config {
 	if config.DatabaseUrl == "" {
 		panic("empty database url")
 	}
+	config.FileDownloadActive = defaultIfNil(config.FileDownloadActive, true).(bool)
+	config.UrlReditectActive = defaultIfNil(config.UrlReditectActive, true).(bool)
 	config.MaxFileSize = defaultIfNil(config.MaxFileSize, 104857600).(int)
 	config.Address = defaultIfNil(config.Address, "127.0.0.1").(string)
 	config.Port = defaultIfNil(config.Port, 1315).(int)

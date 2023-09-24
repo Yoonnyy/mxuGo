@@ -8,6 +8,16 @@
 #
 file_upload_active: true
 
+# is url redirect active
+# defaults to true
+#
+# url_redirect_active: true
+
+# is file download active
+# defaults to true
+#
+# file_download_active: true
+
 # database url
 # example:
 # database_url: "postgres://user_name:password@host:port/database_name?sslmode=disable..."
