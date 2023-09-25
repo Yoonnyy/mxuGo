@@ -1,22 +1,22 @@
 # is url shortening active
-# defaults to true
+# defaults to false
 #
-# url_shortening_active: true
+# url_shortening_deactive: false
 
 # is file upload active
 # defaults to false
 #
-file_upload_active: true
+# file_upload_deactive: false
 
 # is url redirect active
-# defaults to true
+# defaults to false
 #
-# url_redirect_active: true
+# url_redirect_deactive: false
 
 # is file download active
-# defaults to true
+# defaults to false
 #
-# file_download_active: true
+# file_download_deactive: false
 
 # database url
 # example:

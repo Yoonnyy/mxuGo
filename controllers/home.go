@@ -17,15 +17,27 @@ var (
 	urls  models.UrlStore
 	files models.FileStore
 )
+var teapot = `⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣤⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣘⣿⣿⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⣀⣀⡀⠀⠀⠀⢀⣀⠘⠛⠛⠛⠛⠛⠛⠁⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⢠⡿⠋⠉⠛⠃⣠⣤⣈⣉⡛⠛⠛⠛⠛⠛⠛⢛⣉⣁⣤⣄⠀⠀⣾⣿⡿⠗⠀
+⠀⢸⡇⠀⠀⠀⣰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣆⠀⣿⣿⠀⠀⠀
+⠀⢸⣇⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⢉⣉⣠⣿⣿⡀⠀⠀
+⠀⠀⠙⠷⡆⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠃⢰⣿⣿⣿⣿⣿⡇⠀⠀
+⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠸⣿⣿⣿⣿⠟⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠙⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠄⠈⠉⠁⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⢄⣉⠉⠛⠛⠛⠛⠛⠋⢉⣉⡠⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠻⠿⠿⠿⠿⠿⠿⠛⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+`
 
 // GET	/{slug}
 func SearchSlug(w http.ResponseWriter, r *http.Request) {
-	if !config.FileDownloadActive && !config.UrlRedirectActive {
+	if config.FileDownloadDeactive && config.UrlRedirectDeactive {
 		w.WriteHeader(418)
 		io.WriteString(w, "services are disabled\n")
 		return
 	}
-	fmt.Println(config.DatabaseUrl)
 	slug := chi.URLParam(r, "slug")
 
 	// check if slug exists
@@ -39,9 +51,9 @@ func SearchSlug(w http.ResponseWriter, r *http.Request) {
 
 	// handle url redirect
 	if !s.IsFile {
-		if !config.UrlRedirectActive {
+		if config.UrlRedirectDeactive {
 			w.WriteHeader(418)
-			io.WriteString(w, "url redirection service is disabled\n")
+			io.WriteString(w, teapot+"url redirection service is disabled\n")
 			return
 		}
 		// get the url
@@ -58,7 +70,7 @@ func SearchSlug(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(301)
 		return
 	}
-	if !config.FileDownloadActive {
+	if config.FileDownloadDeactive {
 		w.WriteHeader(418)
 		io.WriteString(w, "file download service is disabled\n")
 		return
@@ -70,7 +82,7 @@ func SearchSlug(w http.ResponseWriter, r *http.Request) {
 
 // POST /
 func CreateShortened(w http.ResponseWriter, r *http.Request) {
-	if !config.FileUploadActive && !config.UrlShorteningActive {
+	if config.FileUploadDeactive && config.UrlShorteningDeactive {
 		w.WriteHeader(418)
 		io.WriteString(w, "services are disabled\n")
 		return
@@ -92,7 +104,7 @@ func CreateShortened(w http.ResponseWriter, r *http.Request) {
 
 	// shortening url
 	if r.Form.Has("url") {
-		if !config.UrlShorteningActive {
+		if config.UrlShorteningDeactive {
 			w.WriteHeader(418)
 			io.WriteString(w, "url shortening service is disabled\n")
 			return
@@ -135,7 +147,7 @@ func CreateShortened(w http.ResponseWriter, r *http.Request) {
 
 	// file upload
 	if r.MultipartForm.File["file"] != nil {
-		if !config.FileUploadActive {
+		if config.FileUploadDeactive {
 			w.WriteHeader(418)
 			io.WriteString(w, "file upload service is disabled\n")
 			return

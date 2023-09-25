@@ -18,10 +18,9 @@ type application struct {
 
 func (app *application) Serve() error {
 	server := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", app.Config.Address, app.Config.Port),
+		Addr:    fmt.Sprintf("%s:%v", app.Config.Address, app.Config.Port),
 		Handler: app.routes(),
 	}
-
 	return server.ListenAndServe()
 }
 
