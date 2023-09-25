@@ -26,7 +26,6 @@ func SearchSlug(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(config.DatabaseUrl)
-	// TODO: [Setting] Check if file upload or url shortening is active else reject with message
 	slug := chi.URLParam(r, "slug")
 
 	// check if slug exists
@@ -66,8 +65,7 @@ func SearchSlug(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// handle file download
-	// TODO: [Setting uploads folder]
-	http.ServeFile(w, r, fmt.Sprintf("uploads/%s", s.Slug))
+	http.ServeFile(w, r, fmt.Sprintf("%s/%s", config.UploadsFolder, s.Slug))
 }
 
 // POST /
@@ -77,9 +75,8 @@ func CreateShortened(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "services are disabled\n")
 		return
 	}
-	// TODO: [Setting] Check if file upload or url shortening is active else reject with message
-	// TODO: [Setting] limit file size
-	r.ParseMultipartForm(100 * 1024 * 1024)
+
+	r.ParseMultipartForm(int64(config.MaxFileSize))
 
 	if r.Form.Has("url") && r.MultipartForm.File["file"] != nil {
 		// reject if both url and file is present
@@ -115,9 +112,8 @@ func CreateShortened(w http.ResponseWriter, r *http.Request) {
 		// ping url to check if exists
 
 		// generate slug
-		// TODO: [Setting] length
 		// TODO: check if slug already exists
-		slug := helpers.RandomSlug(6)
+		slug := helpers.RandomSlug(config.SlugLength)
 
 		// save slug and the url to database
 		err := slugs.Insert(false, slug)
@@ -162,13 +158,11 @@ func CreateShortened(w http.ResponseWriter, r *http.Request) {
 		// TODO: check forbidden mime types type
 
 		// generate slug
-		// TODO: [Setting] length
-		slug := helpers.RandomSlug(6)
+		slug := helpers.RandomSlug(config.SlugLength)
 		// check if slug already exists
 
-		// TODO: [Setting uploads folder]
 		// create file
-		file, err := os.Create("uploads/" + slug)
+		file, err := os.Create(config.UploadsFolder + "/" + slug)
 		if err != nil {
 			io.WriteString(w, "error while uploading file.")
 			return

@@ -47,7 +47,20 @@ func ParseConfig() *Config {
 	config.SlugLength = defaultIfNil(config.SlugLength, 6).(int)
 	config.UploadsFolder = defaultIfNil(config.UploadsFolder, "uploads").(string)
 	config.UrlShorteningActive = defaultIfNil(config.UrlShorteningActive, true).(bool)
-	fmt.Printf("%+v", config)
+
+	// create uploads directiory
+	err = os.MkdirAll(config.UploadsFolder, os.ModePerm)
+	if err != nil {
+		panic(fmt.Sprintf(
+			`either the user does not have permission to create directiory 
+or the uploads folder you provided is invalid
+folder you provided: %v`,
+			config.UploadsFolder))
+	}
+
+	if config.UploadsFolder[len(config.UploadsFolder)-1] == '/' {
+		config.UploadsFolder = config.UploadsFolder[:len(config.UploadsFolder)-1]
+	}
 	return &config
 }
 

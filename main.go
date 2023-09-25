@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Yoonnyy/GoMxu/configuration"
@@ -17,7 +18,7 @@ type application struct {
 
 func (app *application) Serve() error {
 	server := &http.Server{
-		Addr:    ":1315",
+		Addr:    fmt.Sprintf("%s:%d", app.Config.Address, app.Config.Port),
 		Handler: app.routes(),
 	}
 
